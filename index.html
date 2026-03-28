@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dark Fantasy Quest - Login</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body class="login-body">
+  <div class="login-container">
+    <div class="login-card">
+      <h1 class="login-title">🗡️ Dark Fantasy Quest</h1>
+      <p class="login-subtitle">Masuk ke dunia petualangan epik...</p>
+      <button id="googleLoginBtn" class="login-btn">
+        <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" class="google-icon">
+        Login dengan Google
+      </button>
+      <div id="loginStatus" class="login-status"></div>
+    </div>
+  </div>
+  
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    
+    window.firebaseConfig = {
+      // GANTI DENGAN CONFIG ANDA DARI FIREBASE CONSOLE
+      apiKey: "your-api-key",
+      authDomain: "your-project.firebaseapp.com",
+      projectId: "your-project-id",
+      storageBucket: "your-project.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "your-app-id"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    window.auth = getAuth(app);
+    window.googleProvider = new GoogleAuthProvider();
+    
+    // Auth logic
+    const loginBtn = document.getElementById('googleLoginBtn');
+    const statusDiv = document.getElementById('loginStatus');
+    
+    loginBtn.addEventListener('click', async () => {
+      try {
+        statusDiv.textContent = 'Memproses...';
+        const result = await signInWithPopup(auth, googleProvider);
+        window.location.href = 'app.html';
+      } catch (error) {
+        statusDiv.textContent = 'Login gagal: ' + error.message;
+        console.error(error);
+      }
+    });
+    
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.location.href = 'app.html';
+      }
+    });
+  </script>
+</body>
+</html>
