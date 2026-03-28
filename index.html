@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dark Fantasy Quest - Login</title>
+  <title>Dark Fantasy Quest</title>
   <link rel="stylesheet" href="css/style.css">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 </head>
@@ -16,49 +16,65 @@
         <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" class="google-icon">
         Login dengan Google
       </button>
-      <div id="loginStatus" class="login-status"></div>
+      <div id="loginStatus" class="login-status hidden">Loading...</div>
     </div>
   </div>
-  
-  <!-- Firebase SDK -->
+
+  <!-- Firebase v9+ CDN (FIXED) -->
   <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-    
-    window.firebaseConfig = {
-      // GANTI DENGAN CONFIG ANDA DARI FIREBASE CONSOLE
-      apiKey: "your-api-key",
-      authDomain: "your-project.firebaseapp.com",
-      projectId: "your-project-id",
-      storageBucket: "your-project.appspot.com",
-      messagingSenderId: "123456789",
-      appId: "your-app-id"
+    // 🔥 GANTI INI DENGAN CONFIG DARI FIREBASE CONSOLE ANDA
+    const firebaseConfig = {
+      apiKey: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", // ← GANTI!
+      authDomain: "your-project.firebaseapp.com",              // ← GANTI!
+      projectId: "your-project-id",                            // ← GANTI!
+      storageBucket: "your-project.appspot.com",               // ← GANTI!
+      messagingSenderId: "123456789",                          // ← GANTI!
+      appId: "1:123456789:web:abcdef1234567890"                // ← GANTI!
     };
-    
-    const app = initializeApp(firebaseConfig);
-    window.auth = getAuth(app);
-    window.googleProvider = new GoogleAuthProvider();
-    
-    // Auth logic
-    const loginBtn = document.getElementById('googleLoginBtn');
-    const statusDiv = document.getElementById('loginStatus');
-    
-    loginBtn.addEventListener('click', async () => {
-      try {
-        statusDiv.textContent = 'Memproses...';
-        const result = await signInWithPopup(auth, googleProvider);
-        window.location.href = 'app.html';
-      } catch (error) {
-        statusDiv.textContent = 'Login gagal: ' + error.message;
-        console.error(error);
-      }
-    });
-    
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        window.location.href = 'app.html';
-      }
-    });
+
+    // Initialize Firebase
+    import('https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js')
+      .then(async ({ initializeApp }) => {
+        window.app = initializeApp(firebaseConfig);
+        
+        return import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
+      })
+      .then(async ({ getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged }) => {
+        window.auth = getAuth(window.app);
+        window.GoogleAuthProvider = GoogleAuthProvider;
+        
+        const provider = new GoogleAuthProvider();
+        const loginBtn = document.getElementById('googleLoginBtn');
+        const status = document.getElementById('loginStatus');
+        
+        // Auto redirect jika sudah login
+        onAuthStateChanged(window.auth, (user) => {
+          if (user) {
+            window.location.href = 'app.html';
+          }
+        });
+        
+        // Login button
+        loginBtn.onclick = async () => {
+          try {
+            status.textContent = '🔄 Login...';
+            status.classList.remove('hidden');
+            
+            const result = await signInWithPopup(window.auth, provider);
+            console.log('✅ Login success:', result.user);
+            window.location.href = 'app.html';
+          } catch (error) {
+            console.error('❌ Login error:', error);
+            status.textContent = '❌ Login gagal: ' + error.message;
+          }
+        };
+        
+        status.classList.add('hidden');
+      })
+      .catch(error => {
+        console.error('Firebase init error:', error);
+        document.getElementById('loginStatus').textContent = '❌ Firebase error';
+      });
   </script>
 </body>
 </html>
